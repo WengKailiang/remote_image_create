@@ -1,7 +1,7 @@
 interface:
   display_name: "Remote Sensing Image Merging"
   short_description: "ArcGIS Landsat 8 true-color clipping"
-  default_prompt: "Use $remote-sensing-image-merging to process Landsat 8 OLI_TIRS archives with B4/B3/B2 true-color bands into a 遥感图像处理结果 package, keep source data under 原始数据, create full and clipped Chinese-named ArcMap layers, and move re-creatable intermediates into 可以删除 without writing temporary files to C drive."
+  default_prompt: "Use $remote-sensing-image-merging to first create the 遥感图像处理结果 raw-data intake folders, then process Landsat 8 OLI_TIRS archives with B4/B3/B2 true-color bands, keep source data under 原始数据, create full and clipped Chinese-named ArcMap layers, and move re-creatable intermediates into 可以删除 without writing temporary files to C drive."
 
 policy:
   allow_implicit_invocation: true

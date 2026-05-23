@@ -7,13 +7,15 @@ description: Use when processing Landsat 8 OLI_TIRS remote-sensing image archive
 
 ## Overview
 
-Process Landsat 8 OLI_TIRS scenes into ArcGIS-ready true-color results: organize inputs, extract `B4/B3/B2`, match the study-area shapefile coordinate system, build a full-scene RGB image, clip the study-area image, create one MXD containing both results, and keep reusable outputs separate from files that can be deleted.
+Process Landsat 8 OLI_TIRS scenes into ArcGIS-ready true-color results: first create a clear raw-data intake folder, then extract `B4/B3/B2`, match the study-area shapefile coordinate system, build a full-scene RGB image, clip the study-area image, create one MXD containing both results, and keep reusable outputs separate from files that can be deleted.
 
 Prefer Landsat 8 OLI_TIRS data packages that contain actual band files such as `*_B2.TIF`, `*_B3.TIF`, and `*_B4.TIF`. A package containing only QA or metadata files is not enough for true-color imagery.
 
 ## Required Inputs
 
-Before running the workflow, confirm:
+Before calculation, create the project folder structure for the user instead of asking them to invent paths. Then tell the user to place files into the named subfolders.
+
+Required folders and inputs:
 
 - A final output package folder named `遥感图像处理结果`.
 - A `遥感图像处理结果\原始数据\landsat8_source` folder containing Landsat 8 OLI_TIRS `.tar` or `.tar.gz` archives, or extracted `.tif` bands.
@@ -28,46 +30,59 @@ If the shapefile lacks `.prj`, stop and ask the user for the correct coordinate 
 
 ## Workflow
 
-1. Create this final package structure:
+1. Initialize the project folder first. This creates the final package structure and explanatory marker files:
    - `遥感图像处理结果\原始数据\landsat8_source`
    - `遥感图像处理结果\原始数据\study_area_boundary`
    - `遥感图像处理结果\landsat8_work`
    - `遥感图像处理结果\可以删除`
+   - `遥感图像处理结果\config.landsat8.local.json`
 2. Inside `landsat8_work`, create processing folders:
    - `00_original_data`
    - `01_intermediate`
    - `02_outputs`
    - `03_arcmap`
    - `_scratch`
-3. Set `TEMP`, `TMP`, `ARCTMPDIR`, `arcpy.env.workspace`, and `arcpy.env.scratchWorkspace` to project-local folders before heavy ArcPy work.
-4. Copy the study-area shapefile components into `00_original_data/study_area_boundary`.
-5. For large remote-sensing archives, avoid unnecessary full duplication unless the user explicitly requests it. Extract only the configured bands into `00_original_data/remote_sensing/extracted_scenes`.
-6. Use the study-area shapefile spatial reference as the target coordinate system.
-7. Reproject every selected raster band to the target coordinate system with bilinear resampling for continuous imagery.
-8. Convert fill values such as `0` to NoData before mosaicking.
-9. Mosaic each band across all scenes.
-10. Composite bands in display order. Default true-color Landsat 8 order is `B4`, `B3`, `B2`.
-11. Clip the complete mosaic by the study-area shapefile.
-12. Create one MXD containing Chinese-named layers:
+3. Stop after initialization and ask the user to place:
+   - Landsat 8 OLI_TIRS `.tar`, `.tar.gz`, `.tgz`, or extracted band `.TIF` files into `原始数据\landsat8_source`.
+   - The complete study-area shapefile components into `原始数据\study_area_boundary`.
+4. After the user confirms files are in place, run calculation with the generated config.
+5. Set `TEMP`, `TMP`, `ARCTMPDIR`, `arcpy.env.workspace`, and `arcpy.env.scratchWorkspace` to project-local folders before heavy ArcPy work.
+6. Copy the study-area shapefile components into `00_original_data/study_area_boundary`.
+7. For large remote-sensing archives, avoid unnecessary full duplication unless the user explicitly requests it. Extract only the configured bands into `00_original_data/remote_sensing/extracted_scenes`.
+8. Use the study-area shapefile spatial reference as the target coordinate system.
+9. Reproject every selected raster band to the target coordinate system with bilinear resampling for continuous imagery.
+10. Convert fill values such as `0` to NoData before mosaicking.
+11. Mosaic each band across all scenes.
+12. Composite bands in display order. Default true-color Landsat 8 order is `B4`, `B3`, `B2`.
+13. Clip the complete mosaic by the study-area shapefile.
+14. Create one MXD containing Chinese-named layers:
     - `研究区边界`
     - `研究区遥感影像（裁剪结果）`
     - `完整遥感影像（拼接结果）`
-13. Save file outputs with English names to reduce ArcGIS path/name issues, but use Chinese layer names inside ArcMap.
-14. Keep final rasters and the comprehensive MXD in `landsat8_work\02_outputs` and `landsat8_work\03_arcmap`.
-15. Move re-creatable processing folders such as `00_original_data`, `01_intermediate`, and `_scratch` into `遥感图像处理结果\可以删除`. Do not move the full mosaic, clipped raster, source archive, study-area shapefile, or comprehensive MXD there.
+15. Save file outputs with English names to reduce ArcGIS path/name issues, but use Chinese layer names inside ArcMap.
+16. Keep final rasters and the comprehensive MXD in `landsat8_work\02_outputs` and `landsat8_work\03_arcmap`.
+17. Move re-creatable processing folders such as `00_original_data`, `01_intermediate`, and `_scratch` into `遥感图像处理结果\可以删除`. Do not move the full mosaic, clipped raster, source archive, study-area shapefile, or comprehensive MXD there.
 
 ## Scripted Execution
 
 Use `scripts/process_remote_sensing_arcgis108.py` with ArcGIS Python:
 
+Initialize the project folder first:
+
+```powershell
+& 'C:\Python27\ArcGIS10.8\python.exe' 'path\to\remote-sensing-image-merging\scripts\process_remote_sensing_arcgis108.py' --init-project 'F:\path\to\project\遥感图像处理结果' --output-prefix 'liangcheng_landsat8'
+```
+
+After the user places data into `原始数据\landsat8_source` and `原始数据\study_area_boundary`, run:
+
 ```powershell
 $env:TEMP='F:\path\to\project\_scratch'
 $env:TMP='F:\path\to\project\_scratch'
 $env:ARCTMPDIR='F:\path\to\project\_scratch'
-& 'C:\Python27\ArcGIS10.8\python.exe' 'path\to\remote-sensing-image-merging\scripts\process_remote_sensing_arcgis108.py' --config 'path\to\config.json'
+& 'C:\Python27\ArcGIS10.8\python.exe' 'path\to\remote-sensing-image-merging\scripts\process_remote_sensing_arcgis108.py' --config 'F:\path\to\project\遥感图像处理结果\config.landsat8.local.json'
 ```
 
-Create the config from `references/config-template.json`. Update `project_root`, `remote_sensing_source_dir`, `study_area_shp`, and `arcmap_template_mxd` before running.
+The `--init-project` mode writes `config.landsat8.local.json` automatically. If creating the config manually, start from `references/config-template.json` and update `project_root`, `remote_sensing_source_dir`, `study_area_shp`, `delete_folder`, and `arcmap_template_mxd` before running.
 
 Use this tested folder pattern:
 

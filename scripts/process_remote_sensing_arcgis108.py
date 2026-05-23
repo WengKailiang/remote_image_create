@@ -29,6 +29,17 @@ def ensure_dir(path):
         os.makedirs(path)
 
 
+def write_text(path, text):
+    with codecs.open(path, "w", "utf-8") as handle:
+        handle.write(text)
+
+
+def write_json(path, data):
+    with codecs.open(path, "w", "utf-8") as handle:
+        handle.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True))
+        handle.write(u"\n")
+
+
 def utext(value):
     if isinstance(value, unicode):
         return value
@@ -45,7 +56,10 @@ def uprint(value):
 
 
 def abs_path(path):
-    return os.path.abspath(os.path.expanduser(path))
+    resolved = os.path.abspath(os.path.expanduser(path))
+    if PY2 and not isinstance(resolved, unicode):
+        return resolved.decode("mbcs")
+    return resolved
 
 
 def drive_letter(path):
@@ -56,6 +70,13 @@ def drive_letter(path):
 def assert_not_c_drive(path, label):
     if drive_letter(path) == "c:":
         raise RuntimeError("%s must not be on C drive: %s" % (label, path))
+
+
+def set_env_path(name, path):
+    if PY2 and isinstance(path, unicode):
+        os.environ[name] = path.encode("mbcs")
+    else:
+        os.environ[name] = path
 
 
 def copy_folder_files(src_dir, dst_dir):
@@ -413,10 +434,75 @@ def organize_deletable_outputs(config, project_root, raw_dir, intermediate_dir, 
     return moved
 
 
+def init_project(package_root, output_prefix, arcmap_template_mxd):
+    package_root = abs_path(package_root)
+    assert_not_c_drive(package_root, "init_project")
+    raw_dir = os.path.join(package_root, u"原始数据")
+    landsat_dir = os.path.join(raw_dir, "landsat8_source")
+    boundary_dir = os.path.join(raw_dir, "study_area_boundary")
+    work_dir = os.path.join(package_root, "landsat8_work")
+    delete_dir = os.path.join(package_root, u"可以删除")
+
+    for path in [package_root, raw_dir, landsat_dir, boundary_dir, work_dir, delete_dir]:
+        ensure_dir(path)
+
+    write_text(
+        os.path.join(landsat_dir, u"请把Landsat8_OLI_TIRS数据包放这里.txt"),
+        u"请把 Landsat 8 OLI_TIRS 原始数据包放在这个文件夹。\n"
+        u"需要包含真彩色波段 B4、B3、B2，例如 *_B4.TIF、*_B3.TIF、*_B2.TIF。\n"
+        u"可以放 .tar、.tar.gz、.tgz，或已解压的 .TIF 文件。\n"
+        u"不要只放 QA、MTL、ANG 等辅助文件。\n"
+    )
+    write_text(
+        os.path.join(boundary_dir, u"请把研究区shp完整文件放这里.txt"),
+        u"请把研究区边界 shapefile 的完整组件放在这个文件夹。\n"
+        u"至少需要 .shp、.shx、.dbf、.prj，其他 .cpg、.sbn、.sbx、.xml 等 sidecar 文件也一起放入。\n"
+        u"默认文件名为 study_area_boundary.shp；如果名称不同，请修改同级 config.landsat8.local.json 的 study_area_shp。\n"
+    )
+
+    config_path = os.path.join(package_root, "config.landsat8.local.json")
+    config = {
+        "project_root": os.path.join(package_root, "landsat8_work"),
+        "remote_sensing_source_dir": landsat_dir,
+        "study_area_shp": os.path.join(boundary_dir, "study_area_boundary.shp"),
+        "output_prefix": output_prefix,
+        "band_tokens": ["B4", "B3", "B2"],
+        "copy_source_archives": False,
+        "copy_extracted_source_tifs": True,
+        "copy_boundary": True,
+        "extract_archives": True,
+        "cell_size": "30",
+        "pixel_type": "16_BIT_UNSIGNED",
+        "nodata_values": [0],
+        "resampling_type": "BILINEAR",
+        "mosaic_method": "FIRST",
+        "build_pyramids": True,
+        "calculate_statistics": True,
+        "arcmap_template_mxd": arcmap_template_mxd,
+        "organize_deletable_outputs": True,
+        "delete_folder": delete_dir,
+    }
+    write_json(config_path, config)
+
+    uprint(u"已创建遥感影像处理项目文件夹: %s" % package_root)
+    uprint(u"请把 Landsat 8 OLI_TIRS 数据包放入: %s" % landsat_dir)
+    uprint(u"请把研究区 shp 完整组件放入: %s" % boundary_dir)
+    uprint(u"数据放好后运行: process_remote_sensing_arcgis108.py --config \"%s\"" % config_path)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Mosaic remote-sensing scenes and clip by a study-area shapefile with ArcGIS 10.x.")
-    parser.add_argument("--config", required=True, help="Path to JSON config.")
+    parser.add_argument("--config", help="Path to JSON config.")
+    parser.add_argument("--init-project", help="Create the 遥感图像处理结果 folder structure and a local config, then stop.")
+    parser.add_argument("--output-prefix", default="liangcheng_landsat8", help="Output file prefix for --init-project.")
+    parser.add_argument("--arcmap-template-mxd", default=r"D:\Program Files (x86)\ArcGIS\Desktop10.8\MapTemplates\Traditional Layouts\LetterLandscape.mxd", help="ArcMap template MXD path for --init-project.")
     args = parser.parse_args()
+
+    if args.init_project:
+        init_project(args.init_project, args.output_prefix, args.arcmap_template_mxd)
+        return
+    if not args.config:
+        parser.error("--config is required unless --init-project is used.")
 
     config = load_json(args.config)
     project_root = abs_path(config["project_root"])
@@ -453,9 +539,9 @@ def main():
         assert_not_c_drive(path, label)
         ensure_dir(path)
 
-    os.environ["TEMP"] = scratch_dir
-    os.environ["TMP"] = scratch_dir
-    os.environ["ARCTMPDIR"] = scratch_dir
+    set_env_path("TEMP", scratch_dir)
+    set_env_path("TMP", scratch_dir)
+    set_env_path("ARCTMPDIR", scratch_dir)
 
     import arcpy
     from arcpy.sa import ExtractByMask, SetNull
