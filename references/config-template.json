@@ -1,0 +1,21 @@
+{
+  "project_root": "F:\\path\\to\\project\\遥感图像处理结果\\landsat8_work",
+  "remote_sensing_source_dir": "F:\\path\\to\\project\\遥感图像处理结果\\原始数据\\landsat8_source",
+  "study_area_shp": "F:\\path\\to\\project\\遥感图像处理结果\\原始数据\\study_area_boundary\\study_area_boundary.shp",
+  "output_prefix": "liangcheng_landsat8",
+  "band_tokens": ["B4", "B3", "B2"],
+  "copy_source_archives": false,
+  "copy_extracted_source_tifs": true,
+  "copy_boundary": true,
+  "extract_archives": true,
+  "cell_size": "30",
+  "pixel_type": "16_BIT_UNSIGNED",
+  "nodata_values": [0],
+  "resampling_type": "BILINEAR",
+  "mosaic_method": "FIRST",
+  "build_pyramids": true,
+  "calculate_statistics": true,
+  "arcmap_template_mxd": "D:\\Program Files (x86)\\ArcGIS\\Desktop10.8\\MapTemplates\\Traditional Layouts\\LetterLandscape.mxd",
+  "organize_deletable_outputs": true,
+  "delete_folder": "F:\\path\\to\\project\\遥感图像处理结果\\可以删除"
+}

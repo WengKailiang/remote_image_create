@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+*.pyo
+
+# Local data and ArcGIS outputs
+landsat8_source/
+landsat8_work/
+remote_sensing_work/
+unused_previous_data_to_delete/
+00_original_data/
+01_intermediate/
+02_outputs/
+03_arcmap/
+_scratch/
+
+# Large geospatial source/output files
+*.tar
+*.tar.gz
+*.tgz
+*.tif
+*.tiff
+*.ovr
+*.aux.xml
+*.mxd
+*.lyr
