@@ -1,9 +1,9 @@
 ---
-name: remote-sensing-image-merging
+name: arcgis-remote-sensing-image-merging
 description: Use when processing Landsat 8 OLI_TIRS remote-sensing image archives with ArcGIS Desktop/ArcPy, especially `.tar` or `.tar.gz` packages containing true-color bands `B4/B3/B2` that must be organized, reprojected to a study-area shapefile coordinate system, composited into a complete image, clipped by the study area, and displayed in ArcMap with Chinese layer names while keeping all outputs and temporary files off the C drive.
 ---
 
-# Remote Sensing Image Merging
+# ArcGIS Remote Sensing Image Merging
 
 ## Overview
 
@@ -70,7 +70,7 @@ Use `scripts/process_remote_sensing_arcgis108.py` with ArcGIS Python:
 Initialize the project folder first:
 
 ```powershell
-& 'C:\Python27\ArcGIS10.8\python.exe' 'path\to\remote-sensing-image-merging\scripts\process_remote_sensing_arcgis108.py' --init-project 'F:\path\to\project\遥感图像处理结果' --output-prefix 'liangcheng_landsat8'
+& 'C:\Python27\ArcGIS10.8\python.exe' 'path\to\arcgis-remote-sensing-image-merging\scripts\process_remote_sensing_arcgis108.py' --init-project 'F:\path\to\project\遥感图像处理结果' --output-prefix 'liangcheng_landsat8'
 ```
 
 After the user places data into `原始数据\landsat8_source` and `原始数据\study_area_boundary`, run:
@@ -79,7 +79,7 @@ After the user places data into `原始数据\landsat8_source` and `原始数据
 $env:TEMP='F:\path\to\project\_scratch'
 $env:TMP='F:\path\to\project\_scratch'
 $env:ARCTMPDIR='F:\path\to\project\_scratch'
-& 'C:\Python27\ArcGIS10.8\python.exe' 'path\to\remote-sensing-image-merging\scripts\process_remote_sensing_arcgis108.py' --config 'F:\path\to\project\遥感图像处理结果\config.landsat8.local.json'
+& 'C:\Python27\ArcGIS10.8\python.exe' 'path\to\arcgis-remote-sensing-image-merging\scripts\process_remote_sensing_arcgis108.py' --config 'F:\path\to\project\遥感图像处理结果\config.landsat8.local.json'
 ```
 
 The `--init-project` mode writes `config.landsat8.local.json` automatically. If creating the config manually, start from `references/config-template.json` and update `project_root`, `remote_sensing_source_dir`, `study_area_shp`, `delete_folder`, and `arcmap_template_mxd` before running.
