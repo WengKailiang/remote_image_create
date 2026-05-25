@@ -1,7 +1,12 @@
 {
+  "raw_intake_dir": "F:\\path\\to\\project\\原始数据提供",
+  "import_raw_data_from_intake": true,
   "project_root": "F:\\path\\to\\project\\遥感图像处理结果\\landsat8_work",
   "remote_sensing_source_dir": "F:\\path\\to\\project\\遥感图像处理结果\\原始数据\\landsat8_source",
   "study_area_shp": "F:\\path\\to\\project\\遥感图像处理结果\\原始数据\\study_area_boundary\\study_area_boundary.shp",
+  "points_source_dir": "F:\\path\\to\\project\\遥感图像处理结果\\原始数据\\滑坡点与水电站位置",
+  "landslide_points_shp": "F:\\path\\to\\project\\遥感图像处理结果\\原始数据\\滑坡点与水电站位置\\landslide_points.shp",
+  "hydropower_csv": "F:\\path\\to\\project\\遥感图像处理结果\\原始数据\\滑坡点与水电站位置\\倾泻点.csv",
   "output_prefix": "liangcheng_landsat8",
   "band_tokens": ["B4", "B3", "B2"],
   "copy_source_archives": false,
@@ -16,6 +21,8 @@
   "build_pyramids": true,
   "calculate_statistics": true,
   "arcmap_template_mxd": "D:\\Program Files (x86)\\ArcGIS\\Desktop10.8\\MapTemplates\\Traditional Layouts\\LetterLandscape.mxd",
+  "create_layout_map": true,
+  "layout_map_dir": "F:\\path\\to\\project\\遥感图像处理结果\\landsat8_work\\04_layout_map",
   "organize_deletable_outputs": true,
   "delete_folder": "F:\\path\\to\\project\\遥感图像处理结果\\可以删除"
 }
