@@ -105,6 +105,12 @@ def set_env_path(name, path):
         os.environ[name] = path
 
 
+def process_arg(path):
+    if PY2 and isinstance(path, unicode):
+        return path.encode("mbcs")
+    return path
+
+
 def copy_folder_files(src_dir, dst_dir):
     copied = 0
     skipped = 0
@@ -198,13 +204,26 @@ def find_files(root_dir, extensions):
 
 def preferred_shapefile(paths, keywords, excluded_keywords=None):
     excluded_keywords = excluded_keywords or []
-    lowered = [(path, os.path.basename(path).lower()) for path in paths]
+    def lower_text(value):
+        if isinstance(value, unicode):
+            return value.lower()
+        if PY2:
+            for encoding in ["utf-8", "mbcs"]:
+                try:
+                    return value.decode(encoding).lower()
+                except UnicodeError:
+                    pass
+        return unicode(value).lower()
+
+    lowered = [(path, lower_text(os.path.basename(path))) for path in paths]
+    exclusions = [lower_text(ex) for ex in excluded_keywords]
     for keyword in keywords:
+        needle = lower_text(keyword)
         for path, name in lowered:
-            if keyword.lower() in name and not any(ex.lower() in name for ex in excluded_keywords):
+            if needle in name and not any(ex in name for ex in exclusions):
                 return path
     for path, name in lowered:
-        if not any(ex.lower() in name for ex in excluded_keywords):
+        if not any(ex in name for ex in exclusions):
             return path
     return None
 
@@ -544,7 +563,7 @@ def run_layout_map(config_path, config, project_root):
         uprint(u"Warning: layout map script not found: %s" % script_path)
         return None
     uprint(u"Creating layout map PNG")
-    code = subprocess.call([sys.executable, script_path, abs_path(config_path), layout_dir])
+    code = subprocess.call([process_arg(sys.executable), process_arg(script_path), process_arg(abs_path(config_path)), process_arg(layout_dir)])
     if code != 0:
         uprint(u"Warning: layout map creation failed with exit code %s" % code)
         return None
