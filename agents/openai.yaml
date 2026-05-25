@@ -1,7 +1,7 @@
 interface:
   display_name: "ArcGIS Remote Sensing Image Merging"
   short_description: "ArcGIS Landsat 8 true-color clipping"
-  default_prompt: "Use $arcgis-remote-sensing-image-merging to first create a 原始数据提供 intake folder with instructions, then import Landsat 8 OLI_TIRS B4/B3/B2 data, study-area shapefiles, and optional landslide/hydropower points into 遥感图像处理结果, create full/clipped ArcMap outputs and a layout map, and move re-creatable intermediates into 可以删除 without writing temporary files to C drive."
+  default_prompt: "Use $arcgis-remote-sensing-image-merging to first create a 原始数据提供 intake folder with instructions and a 倾泻点.csv hydropower template, then import Landsat 8 OLI_TIRS B4/B3/B2 data, study-area shapefiles, and optional landslide/hydropower points into 遥感图像处理结果, create full/clipped ArcMap outputs and a layout map, and move re-creatable intermediates into 可以删除 without writing temporary files to C drive."
 
 policy:
   allow_implicit_invocation: true

@@ -35,6 +35,11 @@ def write_text(path, text):
         handle.write(text)
 
 
+def write_text_if_missing(path, text):
+    if not os.path.exists(path):
+        write_text(path, text)
+
+
 def write_json(path, data):
     with codecs.open(path, "w", "utf-8") as handle:
         handle.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True))
@@ -617,7 +622,7 @@ def init_project(init_root, output_prefix, arcmap_template_mxd):
         u"\n"
         u"3. 可选点位：放入 滑坡点与水电站位置 文件夹。\n"
         u"   滑坡点建议命名为 landslide_points.shp，并带齐 .shx、.dbf、.prj 等组件。\n"
-        u"   水电站位置可提供 CSV，字段包含 Longitude 和 Latitude。\n"
+        u"   水电站位置请填写自动生成的 倾泻点.csv 模板，字段为 ID,NAME,Longitude,Latitude。\n"
         u"\n"
         u"正式运行时，脚本会把这里的数据复制整理到 遥感图像处理结果\\原始数据；运行结束后，这个“原始数据提供”文件夹会被移动到 可以删除 中，供你手动删除。\n"
     )
@@ -638,7 +643,13 @@ def init_project(init_root, output_prefix, arcmap_template_mxd):
         os.path.join(intake_points_dir, u"请把滑坡点与水电站位置放这里.txt"),
         u"这个文件夹用于布局制图中的点位叠加，是可选输入。\n"
         u"滑坡点：推荐提供 landslide_points.shp，并带齐 .shx、.dbf、.prj 等 shapefile 组件。\n"
-        u"水电站位置：推荐提供 CSV，字段包含 Longitude 和 Latitude，例如：ID,NAME,Longitude,Latitude。\n"
+        u"水电站位置：请填写本文件夹中自动生成的 倾泻点.csv 模板。\n"
+        u"模板字段为 ID,NAME,Longitude,Latitude；Longitude 和 Latitude 使用十进制度经纬度。\n"
+        u"如果没有水电站点位，可以保留模板只有表头，制图时会自动跳过。\n"
+    )
+    write_text_if_missing(
+        os.path.join(intake_points_dir, u"倾泻点.csv"),
+        u"ID,NAME,Longitude,Latitude\n"
     )
     write_text(
         os.path.join(raw_dir, u"原始数据会由脚本从原始数据提供复制到这里.txt"),
@@ -681,7 +692,7 @@ def init_project(init_root, output_prefix, arcmap_template_mxd):
     uprint(u"已创建遥感影像处理项目文件夹: %s" % package_root)
     uprint(u"请先把 Landsat 8 OLI_TIRS 数据包放入: %s" % intake_landsat_dir)
     uprint(u"请先把研究区 shp 完整组件放入: %s" % intake_boundary_dir)
-    uprint(u"如需布局制图点位，请把滑坡点 shp 和水电站 CSV 放入: %s" % intake_points_dir)
+    uprint(u"如需布局制图点位，请把滑坡点 shp 放入并填写水电站 CSV 模板: %s" % intake_points_dir)
     uprint(u"数据放好后运行: process_remote_sensing_arcgis108.py --config \"%s\"" % config_path)
 
 

@@ -140,8 +140,12 @@ def read_hydropower_csv(path, out_sr):
         raise RuntimeError("Hydropower CSV must contain Longitude/Latitude columns: %s" % path)
     points = []
     for row in rows:
-        lon = float(row[lon_key])
-        lat = float(row[lat_key])
+        lon_text = row.get(lon_key, "").strip()
+        lat_text = row.get(lat_key, "").strip()
+        if not lon_text or not lat_text:
+            continue
+        lon = float(lon_text)
+        lat = float(lat_text)
         points.append(project_lonlat(lon, lat, out_sr))
     return points
 
@@ -343,7 +347,7 @@ def main():
     package_root = os.path.dirname(cfg_path)
     point_dir = os.path.join(package_root, u"原始数据", u"滑坡点与水电站位置")
     landslide_shp = os.path.join(point_dir, "landslide_points.shp")
-    hydropower_csv = os.path.join(point_dir, u"倾泻点.csv")
+    hydropower_csv = cfg.get("hydropower_csv") or os.path.join(point_dir, u"倾泻点.csv")
 
     full_desc = arcpy.Describe(full_raster)
     sr = full_desc.spatialReference

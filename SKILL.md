@@ -21,7 +21,7 @@ Required folders and inputs:
 - A `原始数据提供\所需原始数据说明.txt` file explaining what the user should place in the intake folder.
 - A `原始数据提供\landsat8_source` folder containing Landsat 8 OLI_TIRS `.tar`, `.tar.gz`, `.tgz`, or extracted `.tif` bands.
 - A `原始数据提供\study_area_boundary` folder containing the study-area shapefile.
-- Optional: a `原始数据提供\滑坡点与水电站位置` folder containing `landslide_points.shp` with sidecars and a hydropower CSV with `Longitude` and `Latitude`.
+- Optional: a `原始数据提供\滑坡点与水电站位置` folder containing `landslide_points.shp` with sidecars and the generated `倾泻点.csv` hydropower template filled with `Longitude` and `Latitude`.
 - A final output package folder named `遥感图像处理结果`.
 - A `遥感图像处理结果\原始数据` folder where the script stores imported Landsat, boundary, point, and explanatory text files.
 - The archive must contain true-color bands: `B4` red, `B3` green, and `B2` blue. If only `QA_PIXEL`, `BQA`, `MTL`, or `ANG` files are present, stop and ask the user to download the full Landsat 8 OLI_TIRS product with all bands.
@@ -40,6 +40,7 @@ If the shapefile lacks `.prj`, stop and ask the user for the correct coordinate 
    - `原始数据提供\study_area_boundary`
    - `原始数据提供\滑坡点与水电站位置`
    - `原始数据提供\所需原始数据说明.txt`
+   - `原始数据提供\滑坡点与水电站位置\倾泻点.csv`
    - `遥感图像处理结果\原始数据`
    - `遥感图像处理结果\landsat8_work`
    - `遥感图像处理结果\可以删除`
@@ -54,7 +55,7 @@ If the shapefile lacks `.prj`, stop and ask the user for the correct coordinate 
 3. Stop after initialization and ask the user to place:
    - Landsat 8 OLI_TIRS `.tar`, `.tar.gz`, `.tgz`, or extracted band `.TIF` files into `原始数据提供\landsat8_source`.
    - Complete study-area shapefile components into `原始数据提供\study_area_boundary`.
-   - Optional `landslide_points.*` and hydropower CSV into `原始数据提供\滑坡点与水电站位置`.
+   - Optional `landslide_points.*` into `原始数据提供\滑坡点与水电站位置`, and fill the generated `倾泻点.csv` template for hydropower points.
 4. After the user confirms files are in place, run calculation with the generated config. The script copies raw data and explanatory text from `原始数据提供` into `遥感图像处理结果\原始数据`.
 5. Set `TEMP`, `TMP`, `ARCTMPDIR`, `arcpy.env.workspace`, and `arcpy.env.scratchWorkspace` to project-local folders before heavy ArcPy work.
 6. Copy the study-area shapefile components into `00_original_data/study_area_boundary`.
@@ -101,6 +102,7 @@ Use this tested folder pattern:
 remote_sensing_source_dir = ...\遥感图像处理结果\原始数据\landsat8_source
 study_area_shp = ...\遥感图像处理结果\原始数据\study_area_boundary\study_area_boundary.shp
 points_source_dir = ...\遥感图像处理结果\原始数据\滑坡点与水电站位置
+hydropower_csv = ...\遥感图像处理结果\原始数据\滑坡点与水电站位置\倾泻点.csv
 project_root = ...\遥感图像处理结果\landsat8_work
 delete_folder = ...\遥感图像处理结果\可以删除
 band_tokens = ["B4", "B3", "B2"]
@@ -119,6 +121,7 @@ After processing, check:
 - `02_outputs/*_study_area_clip.tif` exists and is clipped to the study-area boundary.
 - `03_arcmap/*_arcmap.mxd` opens in ArcMap data view.
 - `04_layout_map/*_layout_map.png` exists. Its longitude/latitude frame labels must be generated from the current raster/study-area coordinate system, not copied from a reference figure.
+- If hydropower points are needed, `原始数据提供\滑坡点与水电站位置\倾泻点.csv` should be the user-filled template with fields `ID,NAME,Longitude,Latitude`; if it only has the header, the layout map should skip hydropower points without failing.
 - ArcMap layer names are Chinese, even though output file names are English.
 - All outputs, scratch files, extracted bands, `.lyr`, `.mxd`, pyramids, statistics, and sidecars are inside the project folder, not on `C:\`.
 - If the clipped image looks more saturated than the full image, check display statistics before assuming a data problem. ArcMap often stretches each raster independently; clipped rasters usually have narrower min/max ranges and therefore appear higher contrast. Layer transparency should remain `0` unless the user explicitly asks for transparency.
