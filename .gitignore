@@ -3,6 +3,9 @@ __pycache__/
 *.pyo
 
 # Local data and ArcGIS outputs
+原始数据提供/
+遥感图像处理结果/
+可以删除/
 landsat8_source/
 landsat8_work/
 remote_sensing_work/
