@@ -21,7 +21,7 @@ Required folders and inputs:
 - A `原始数据提供\所需原始数据说明.txt` file explaining what the user should place in the intake folder.
 - A `原始数据提供\landsat8_source` folder containing Landsat 8 OLI_TIRS `.tar`, `.tar.gz`, `.tgz`, or extracted `.tif` bands.
 - A `原始数据提供\study_area_boundary` folder containing the study-area shapefile.
-- Optional: a `原始数据提供\滑坡点与水电站位置` folder containing `landslide_points.shp` with sidecars and the generated `倾泻点.csv` hydropower template. The template already has default `ID` and `NAME`; the user only needs to fill `Longitude` and `Latitude`.
+- Optional: a `原始数据提供\滑坡点与水电站位置` folder containing `landslide_points.shp` with sidecars and the generated `倾泻点.csv` hydropower template. The template uses UTF-8 BOM for Excel, defaults `ID` to `1` and `NAME` to `水电站位置`, and the user only needs to fill `Longitude` and `Latitude`.
 - A final output package folder named `遥感图像处理结果`.
 - A `遥感图像处理结果\原始数据` folder where the script stores imported Landsat, boundary, point, and explanatory text files.
 - The archive must contain true-color bands: `B4` red, `B3` green, and `B2` blue. If only `QA_PIXEL`, `BQA`, `MTL`, or `ANG` files are present, stop and ask the user to download the full Landsat 8 OLI_TIRS product with all bands.
@@ -121,7 +121,7 @@ After processing, check:
 - `02_outputs/*_study_area_clip.tif` exists and is clipped to the study-area boundary.
 - `03_arcmap/*_arcmap.mxd` opens in ArcMap data view.
 - `04_layout_map/*_layout_map.png` exists. Its longitude/latitude frame labels must be generated from the current raster/study-area coordinate system, not copied from a reference figure.
-- If hydropower points are needed, `原始数据提供\滑坡点与水电站位置\倾泻点.csv` should contain default `ID` and `NAME`, so the user only fills `Longitude` and `Latitude`; if those coordinate cells are blank, the layout map should skip hydropower points without failing.
+- If hydropower points are needed, `原始数据提供\滑坡点与水电站位置\倾泻点.csv` should contain default `ID=1` and `NAME=水电站位置`, so the user only fills `Longitude` and `Latitude`; if those coordinate cells are blank, the layout map should skip hydropower points without failing.
 - ArcMap layer names are Chinese, even though output file names are English.
 - All outputs, scratch files, extracted bands, `.lyr`, `.mxd`, pyramids, statistics, and sidecars are inside the project folder, not on `C:\`.
 - If the clipped image looks more saturated than the full image, check display statistics before assuming a data problem. ArcMap often stretches each raster independently; clipped rasters usually have narrower min/max ranges and therefore appear higher contrast. Layer transparency should remain `0` unless the user explicitly asks for transparency.
