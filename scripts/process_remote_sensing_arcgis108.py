@@ -40,6 +40,17 @@ def write_text_if_missing(path, text):
         write_text(path, text)
 
 
+def write_hydropower_template(path):
+    template = u"ID,NAME,Longitude,Latitude\n1,水电站,,\n"
+    if not os.path.exists(path):
+        write_text(path, template)
+        return
+    with codecs.open(path, "r", "utf-8-sig") as handle:
+        existing = handle.read().strip()
+    if existing == u"ID,NAME,Longitude,Latitude":
+        write_text(path, template)
+
+
 def write_json(path, data):
     with codecs.open(path, "w", "utf-8") as handle:
         handle.write(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True))
@@ -622,7 +633,7 @@ def init_project(init_root, output_prefix, arcmap_template_mxd):
         u"\n"
         u"3. 可选点位：放入 滑坡点与水电站位置 文件夹。\n"
         u"   滑坡点建议命名为 landslide_points.shp，并带齐 .shx、.dbf、.prj 等组件。\n"
-        u"   水电站位置请填写自动生成的 倾泻点.csv 模板，字段为 ID,NAME,Longitude,Latitude。\n"
+        u"   水电站位置请填写自动生成的 倾泻点.csv 模板；ID 和 NAME 已有默认值，只需要填写 Longitude 和 Latitude。\n"
         u"\n"
         u"正式运行时，脚本会把这里的数据复制整理到 遥感图像处理结果\\原始数据；运行结束后，这个“原始数据提供”文件夹会被移动到 可以删除 中，供你手动删除。\n"
     )
@@ -644,13 +655,10 @@ def init_project(init_root, output_prefix, arcmap_template_mxd):
         u"这个文件夹用于布局制图中的点位叠加，是可选输入。\n"
         u"滑坡点：推荐提供 landslide_points.shp，并带齐 .shx、.dbf、.prj 等 shapefile 组件。\n"
         u"水电站位置：请填写本文件夹中自动生成的 倾泻点.csv 模板。\n"
-        u"模板字段为 ID,NAME,Longitude,Latitude；Longitude 和 Latitude 使用十进制度经纬度。\n"
-        u"如果没有水电站点位，可以保留模板只有表头，制图时会自动跳过。\n"
+        u"ID 和 NAME 已有默认值，只需要填写 Longitude 和 Latitude 两列；经纬度使用十进制度。\n"
+        u"如果没有水电站点位，可以保留 Longitude 和 Latitude 为空，制图时会自动跳过。\n"
     )
-    write_text_if_missing(
-        os.path.join(intake_points_dir, u"倾泻点.csv"),
-        u"ID,NAME,Longitude,Latitude\n"
-    )
+    write_hydropower_template(os.path.join(intake_points_dir, u"倾泻点.csv"))
     write_text(
         os.path.join(raw_dir, u"原始数据会由脚本从原始数据提供复制到这里.txt"),
         u"这里是 skill 处理时使用的原始数据归档位置。\n"
